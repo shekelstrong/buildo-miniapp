@@ -1,27 +1,90 @@
 # buildo-miniapp
 
-**Telegram Mini App** для Buildo — дашборд "мои сайты" + /articles дайджест + быстрые действия.
+**Telegram Mini App для Buildo** — управление сайтами прямо в Telegram. React 18 + Vite + @telegram-apps/sdk.
 
-## Stack (план)
+## Запуск (dev)
 
-- **Next.js 14** (App Router) + Vercel (deploy **manual** by user)
-- **`@telegram-apps/telegram-ui`** — нативный UI-кит в стиле Telegram
-- **`@telegram-apps/sdk`** — Telegram WebApp SDK
-- **Supabase** — Auth + DB (shared с buildo-web)
-- **Layero** — production host (user deploys manually)
+```bash
+cd buildo-miniapp
+npm install
+npm run dev
+# открой http://localhost:5173 (с подделкой Telegram.WebApp через mock)
+```
 
-## Status
+## Build
 
-- **Phase 0** — repo created, no code yet
-- **Phase 1 / MVP** — список сайтов, кнопка "открыть в tg-боте", подписка на /articles
+```bash
+npm run build
+# результат: dist/
+```
 
-## Deploy
+## Deploy на Layero
 
-NO CI/CD. User deploys manually to Vercel or Layero.
+```bash
+# dist/ залить на Layero как статику
+# (в будущем: npx layero deploy --framework=vite)
+```
 
-## Related
+## Структура
 
-- **Spec**: `nemo-team-docs/projects/site-builder-audit.md` (2026-06-11 supplement)
-- **Hub**: `nemo-team-docs/projects/buildo/`
-- **Bot**: `shekelstrong/buildo-bot`
-- **Web**: `shekelstrong/buildo-web`
+```
+src/
+  App.tsx              # роутер между 3 экранами
+  main.tsx             # entry
+  index.css            # Tailwind
+  hooks/
+    useTelegram.ts     # TMA SDK init + haptic feedback
+  screens/
+    SitesListScreen.tsx    # Главный — список сайтов
+    NewSiteScreen.tsx      # Создание нового
+    ProfileScreen.tsx      # Профиль + тариф
+  lib/
+    store.ts           # zustand state (sites, create, delete)
+```
+
+## Что работает в MVP
+
+- ✓ 3 экрана с навигацией
+- ✓ Telegram WebApp SDK init (initDataUnsafe, theme, colorScheme)
+- ✓ Haptic feedback на нажатия
+- ✓ Zustand store (mock data)
+- ✓ Mobile-first UI с правильным viewport-fit
+- ✓ Brand-стиль Buildo (ocean/tide/cream)
+- ✓ Mock создания/удаления сайтов
+
+## Что будет в Phase 1.5
+
+- Подключение к реальному backend API buildo-bot (FastAPI на 108.165.164.85:8888)
+- Real auth через `initData` signature
+- Реальные сайты из БД
+- WebSocket для real-time обновлений статуса генерации
+- WebApp.BackButton / MainButton
+- CloudStorage для draft промтов
+
+## Технологии
+
+- **React 18.3** + **TypeScript 5.6**
+- **Vite 5.4** (быстрый dev server + build)
+- **@telegram-apps/sdk 3.0** (Bot API 7.0+)
+- **@telegram-apps/telegram-ui 2.0** (Telegram-style components)
+- **react-router-dom 6.26** (внутренняя навигация)
+- **TailwindCSS 3.4** (стили)
+- **lucide-react** (icons)
+- **zustand 4.5** (state)
+
+## Telegram-бот интеграция
+
+В `bot/main.py` (buildo-bot) добавить обработчик команды `/app`:
+```python
+@dp.message(Command("app"))
+async def cmd_app(message: Message):
+    await message.answer(
+        "Открыть Buildo Mini App:",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(
+                text="🚀 Открыть",
+                web_app=WebAppInfo(url="https://buildo-miniapp.layero.app")
+            )
+        ]])
+    )
+```
