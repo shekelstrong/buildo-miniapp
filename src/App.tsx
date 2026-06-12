@@ -9,8 +9,7 @@ type Screen = 'list' | 'new' | 'profile';
 export function App() {
   const [screen, setScreen] = useState<Screen>('list');
   const { isReady, user } = useTelegram();
-
-  // Dev mode: render even without Telegram SDK
+  void user; // user fetched for future profile; not used in shell yet
   if (!isReady) {
     return (
       <div className="flex h-screen items-center justify-center bg-cream">

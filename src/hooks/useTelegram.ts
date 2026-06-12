@@ -1,6 +1,5 @@
 // Telegram Mini App SDK init + theme sync
 import { useEffect, useState } from 'react';
-import { init, miniApp, themeParams } from '@telegram-apps/sdk';
 
 export function useTelegram() {
   const [isReady, setIsReady] = useState(false);
@@ -9,7 +8,6 @@ export function useTelegram() {
 
   useEffect(() => {
     try {
-      init();
       setIsReady(true);
       // Try to get user data from Telegram.WebApp
       const tg = (window as any).Telegram?.WebApp;
@@ -37,4 +35,29 @@ export function useTelegram() {
 export function hapticFeedback(style: 'light' | 'medium' | 'heavy' = 'light') {
   const tg = (window as any).Telegram?.WebApp;
   tg?.HapticFeedback?.impactOccurred(style);
+}
+
+/**
+ * Open an external URL using Telegram.WebApp.openLink (falls back to
+ * plain window.open when running outside Telegram for dev mode).
+ */
+export function openLink(url: string, tryInstantView = false): void {
+  const tg = (window as any).Telegram?.WebApp;
+  if (tg?.openLink) {
+    tg.openLink(url, { try_instant_view: tryInstantView });
+    return;
+  }
+  window.open(url, '_blank', 'noopener');
+}
+
+/**
+ * Open a t.me / telegram.org link inside the Telegram app.
+ */
+export function openTelegramLink(url: string): void {
+  const tg = (window as any).Telegram?.WebApp;
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+    return;
+  }
+  window.open(url, '_blank', 'noopener');
 }

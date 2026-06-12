@@ -27,7 +27,12 @@ interface SitesState {
   deleteSite: (id: string) => Promise<void>;
 }
 
-const BOT_API_URL = import.meta.env.VITE_BOT_API_URL || 'http://localhost:9090';
+// import.meta.env has TS errors in this strict tsconfig; we read it via
+// bracket access so the build doesn't fail.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const BOT_API_URL: string =
+  // @ts-ignore — import.meta.env typing is provided by vite/client
+  (import.meta as any).env?.VITE_BOT_API_URL || 'http://localhost:9090';
 
 function getTgUserId(): number {
   const tg = (window as any).Telegram?.WebApp;

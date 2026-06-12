@@ -103,7 +103,6 @@ export function SitesListScreen({ onNavigate }: Props) {
 
 function SiteCard({ site }: { site: Site }) {
   const status = site.status;
-  const isLive = status === 'deployed' || status === 'published';
 
   return (
     <div className="card-pwa flex items-center gap-3">
